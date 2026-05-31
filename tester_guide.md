@@ -6,8 +6,6 @@
 
 ---
 
-# LINK TO INSTALL LATEST VERSION
-Contact nvalencia1996@gmail.com
 
 ## The 30-second version
 
@@ -123,3 +121,6 @@ You're testing something that turns "I wish my website could just do that in GoH
 this connection.
 
 **Install once, then just describe what you want. That's it.**
+
+## LINK TO INSTALL LATEST VERSION
+Contact nvalencia1996@gmail.com

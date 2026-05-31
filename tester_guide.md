@@ -6,6 +6,9 @@
 
 ---
 
+# LINK TO INSTALL LATEST VERSION
+Contact nvalencia1996@gmail.com
+
 ## The 30-second version
 
 Normally, getting a website or an AI agent to "talk to" your GoHighLevel account is a technical

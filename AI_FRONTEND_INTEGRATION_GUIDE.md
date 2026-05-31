@@ -14,7 +14,7 @@
 Every single feature is reached through **one endpoint**, with **one POST request**, in **one envelope shape**:
 
 ```
-POST https://<your-domain>/ghl_api/controller.php
+POST https://estimatr.tools/ghl_api/controller.php
 Content-Type: application/json
 ```
 

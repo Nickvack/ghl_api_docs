@@ -6,7 +6,6 @@
 
 ---
 
-
 ## The 30-second version
 
 Normally, getting a website or an AI agent to "talk to" your GoHighLevel account is a technical
@@ -28,10 +27,12 @@ Think of it as a universal remote control for a GoHighLevel sub-account. Here's 
 |--------------|--------------|
 | **Capture leads** | Create and update contacts from any website form |
 | **Look people up** | Search and pull contact details |
-| **Book appointments** | Show available time slots and book calendar events |
+| **Track activity** | Add notes and follow-up tasks to a contact, mark tasks complete |
+| **Book appointments** | Show available time slots and book calendar appointments |
 | **Message people** | Send SMS and emails, read conversation history |
 | **Manage deals** | Create and move opportunities through pipelines |
 | **Tag & organize** | Add and manage tags and custom fields |
+| **Sell products** | Manage a product catalog and pricing |
 | **Handle money** | Create invoices and estimates, manage coupons, view orders & transactions |
 | **Custom data** | Store and retrieve your own custom objects (e.g. properties, vehicles, policies) |
 | **Files** | Upload and manage media/files |
@@ -73,6 +74,8 @@ AI agent, and it builds it. For example:
 - *"Make a booking page that shows my calendar's open slots and lets people book a call."*
 - *"Create a page where I can search my contacts by name."*
 - *"Add a button that sends a welcome text message to a new lead."*
+- *"After someone books, log a note on their contact and create a follow-up task for me."*
+- *"Build a quote page that lists my products and prices so I can put together an estimate."*
 
 The AI already has a full instruction sheet for this app (the technical companion to this guide),
 so it knows exactly how to connect everything.
@@ -121,6 +124,3 @@ You're testing something that turns "I wish my website could just do that in GoH
 this connection.
 
 **Install once, then just describe what you want. That's it.**
-
-## LINK TO INSTALL LATEST VERSION
-Contact nvalencia1996@gmail.com

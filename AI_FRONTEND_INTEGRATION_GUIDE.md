@@ -14,7 +14,7 @@
 Every single feature is reached through **one endpoint**, with **one POST request**, in **one envelope shape**:
 
 ```
-POST https://estimatr.tools/ghl_api/controller.php
+POST https://<your-domain>/ghl_api/controller.php
 Content-Type: application/json
 ```
 
@@ -102,6 +102,19 @@ error-prone. Flat fields exist mainly for GHL workflow webhook custom values.
 - `contacts.create` — payload: `firstName`, `lastName`, `email`, `phone`, `tags`, `customFields`
 - `contacts.update` — `id` + payload
 - `contacts.delete` — `id`
+- **Notes** (require `contactId`):
+  - `contacts.notes.list` — `contactId`
+  - `contacts.notes.get` — `contactId` + `noteId`
+  - `contacts.notes.create` — `contactId` + `body` (and optional `userId`)
+  - `contacts.notes.update` — `contactId` + `noteId` + `body`
+  - `contacts.notes.delete` — `contactId` + `noteId`
+- **Tasks** (require `contactId`):
+  - `contacts.tasks.list` — `contactId`
+  - `contacts.tasks.get` — `contactId` + `taskId`
+  - `contacts.tasks.create` — `contactId` + `title`, `body`, `dueDate` (ISO), optional `assignedTo`, `completed`
+  - `contacts.tasks.update` — `contactId` + `taskId` + fields
+  - `contacts.tasks.complete` — `contactId` + `taskId` + `completed` (true/false)
+  - `contacts.tasks.delete` — `contactId` + `taskId`
 
 ### Users — `users.*`
 - `users.list`, `users.get` (`id`), `users.create`, `users.update` (`id`), `users.delete` (`id`)
@@ -130,11 +143,21 @@ error-prone. Flat fields exist mainly for GHL workflow webhook custom values.
 - `calendars.availability.get` — `calendarId`, `startDate`, `endDate`, `timezone`, `duration`, optional `userId`
 - `calendars.services.list`, `calendars.services.get` (`id`)
 - `calendars.events.list`, `calendars.events.get` (`id`), `calendars.events.create`, `calendars.events.update` (`id`), `calendars.events.delete` (`id`)
-  - Event/appointment payload: `calendarId`, `contactId`, `title`, `startTime`, `endTime`, `appointmentStatus`
+  - Event payload: `calendarId`, `contactId`, `title`, `startTime`, `endTime`, `appointmentStatus`
+  - `calendars.events.list` accepts `calendarId` + `startTime`/`endTime` (or `startDate`/`endDate`) — dates are auto-converted to epoch-millis. A `calendarId`, `userId`, or `groupId` is **required**.
 - `calendars.appointmentnotes.list` / `.get` / `.create` / `.update` / `.delete`
 
+### Appointments — `appointments.*`
+> Appointments are GHL calendar events. This is the recommended way to **book** an appointment.
+- `appointments.create` — payload: `calendarId`, `contactId`, `title`, `startTime`, `endTime`, `appointmentStatus` (e.g. `confirmed`), optional `assignedUserId`, `notes`
+- `appointments.get` — `id`
+- `appointments.update` — `id` + payload
+- `appointments.delete` — `id`
+- `appointments.list` — `calendarId`/`userId`/`groupId` + `startTime`/`endTime` (required)
+
 ### Opportunities — `opportunities.*`
-- `opportunities.list`, `opportunities.get` (`id`), `opportunities.create`, `opportunities.update` (`id`), `opportunities.delete` (`id`)
+- `opportunities.list` / `opportunities.search` — filters auto-mapped (uses `location_id` internally); optional `query`, `pipeline_id`, `pipeline_stage_id`, `limit`
+- `opportunities.get` (`id`), `opportunities.create`, `opportunities.update` (`id`), `opportunities.delete` (`id`)
 
 ### Pipelines — `pipelines.*`
 - `pipelines.list`, `pipelines.get` (`id`), `pipelines.create`, `pipelines.update` (`id`), `pipelines.delete` (`id`)
@@ -170,10 +193,23 @@ error-prone. Flat fields exist mainly for GHL workflow webhook custom values.
 - `associations.byentity` — `entityId` (find associations for a record/contact)
 
 ### Media Storage — `media.*` (aliases `medias.*`, `mediastorage.*`)
-- `media.list` — filters
+- `media.list` — optional filters (`limit`, `query`, `parentId`, `type`); the bridge auto-adds the required `altId`/`altType`/`type`/`sortBy`/`sortOrder`
 - `media.get` (`id`)
-- `media.upload` — send `payload` with the file data
+- `media.upload` — send `payload` with the file data (`url`, `name`, optional `folderId`)
 - `media.delete` (`id`)
+
+### Products — `products.*`
+- `products.list` — filters: `limit`, `offset`, `search`
+- `products.get` (`id`)
+- `products.create` — payload: `name`, `productType` (`DIGITAL`/`PHYSICAL`/`SERVICE`), `description`
+- `products.update` (`id`) + payload
+- `products.delete` (`id`)
+- **Prices** (require `productId`):
+  - `products.prices.list` — `productId`
+  - `products.prices.get` — `productId` + `priceId`
+  - `products.prices.create` — `productId` + `name`, `type` (`one_time`/`recurring`), `currency`, `amount`
+  - `products.prices.update` — `productId` + `priceId` + fields
+  - `products.prices.delete` — `productId` + `priceId`
 
 ### Invoices — `invoices.invoice.*`
 - `invoices.invoice.list`, `.get` (`id`), `.create`, `.update` (`id`), `.delete` (`id`)
@@ -234,10 +270,10 @@ const slots = (await callGhl({
 })).data;
 ```
 
-### Book the appointment
+### Book the appointment (use `appointments.create`)
 ```js
 await callGhl({
-  type: 'calendars.events.create',
+  type: 'appointments.create',
   locationId,
   payload: {
     calendarId, contactId,
@@ -256,6 +292,39 @@ await callGhl({
   locationId,
   payload: { type: 'SMS', contactId, message: 'Thanks for reaching out!' }
 });
+```
+
+### Log a note on a contact
+```js
+await callGhl({
+  type: 'contacts.notes.create',
+  locationId,
+  contactId,
+  body: 'Spoke with the client — ready to move forward.'
+});
+```
+
+### Create a follow-up task
+```js
+await callGhl({
+  type: 'contacts.tasks.create',
+  locationId,
+  contactId,
+  title:   'Send proposal',
+  body:    'Email the signed proposal PDF',
+  dueDate: '2026-06-10T15:00:00Z'
+});
+```
+
+### Product picker for an invoice (list products → list prices)
+```js
+const products = (await callGhl({ type: 'products.list', locationId, limit: 50 })).data;
+
+const prices = (await callGhl({
+  type: 'products.prices.list',
+  locationId,
+  productId: chosenProductId
+})).data;
 ```
 
 ### Custom object record (e.g. a "Properties" object)

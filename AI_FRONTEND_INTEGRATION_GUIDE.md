@@ -43,7 +43,7 @@ Content-Type: application/json
 ```js
 // Single helper used for every call to the bridge.
 async function callGhl(customData) {
-  const ENDPOINT = 'https://<your-domain>/ghl_api/controller.php';
+  const ENDPOINT = 'https://estimatr.tools/ghl_api/controller.php';
 
   const res = await fetch(ENDPOINT, {
     method: 'POST',
